@@ -4,20 +4,23 @@ ENV NODE_ENV=production
 
 WORKDIR /app
 
-# Copy package.json and package-lock.json (if it exists)
+# Copy package.json and package-lock.json
 COPY ["package.json", "package-lock.json*", "./"]
 
-# Install production dependencies and build tools
-RUN npm install --production && npm install typescript tsup --save-dev
+# Install all dependencies (dev + prod)
+RUN npm install
 
-# Copy the entire project
+# Copy the rest of the project
 COPY . .
 
-# Run the build script to compile TypeScript and bundle with tsup
+# Build TypeScript code
 RUN npm run build
 
-# Expose port 3000
+# Remove dev dependencies to slim down image
+RUN npm prune --production
+
+# Expose port
 EXPOSE 3000
 
-# Run the production script
+# Run production
 CMD ["node", "dist/index.js"]
